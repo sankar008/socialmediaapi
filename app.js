@@ -11,6 +11,7 @@ const friendRouter = require('./v1/friends/friend.router');
 const groupRouter = require('./v1/groups/group.router');
 const categoryRouter = require('./v1/categories/categories.router');
 const commentRouter = require('./v1/comments/comment.router');
+const skillRouter = require("./v1/skill/skill.router");
 
 const upload = multer({
 	limits: { fieldSize: 25 * 1024 * 1024 }
@@ -38,6 +39,7 @@ app.use('/v1/comment', commentRouter);
 app.use('/v1/category', categoryRouter);
 app.use('/v1/friend', friendRouter);
 app.use('/v1/group', groupRouter);
+app.use('/v1/skill', skillRouter);
 
 httpsServer.listen(process.env.PORT, () => {
 console.log("Server is running:", process.env.PORT);
