@@ -24,6 +24,8 @@ var UserSchema = new mongoose.Schema({
 	verified: { type: String, enum : ['1','0'], default: '0' },
 	username: { type: String },
 	groups: {type: Array},
+	skills: { type: Array},
+	experiences: { type: Array},
 	friends: {type: Array},
 	otp: { type: String }
 

@@ -135,7 +135,7 @@ const updateUser = async(req, res) => {
             country: body.country,
             state: body.state,
             city: body.city,
-	    gender: body.gender,	
+	        gender: body.gender,	
             address: body.address,
             business_area: body.business_area,
             mobileno: body.mobileno,
@@ -143,6 +143,8 @@ const updateUser = async(req, res) => {
             image: body.image,
             password: body.password,
             verified: body.verified,
+            skills: body.skills,
+            experiences: body.experiences,
             username: body.role == 'company'?body.company_name:body.firstName+' '+body.lastName,
             otp: body.otp
          })

@@ -30,6 +30,8 @@ const createPost = async (req, res) => {
 
         const post = new postModel({        
             userCode: body.userCode,
+            title: body.title,
+            isAlbum: body.isAlbum,
             details: body.details,
             image: body.image,
             postCode: Math.random().toString().substr(2, 6),
