@@ -7,33 +7,22 @@ const createPost = async (req, res) => {
     const body = req.body; 
     try{  
         
-        if(body.image.length > 1){
-            var newimage = [];
+         const imageArray = [];
             for(var i = 0; i <body.image.length; i++){
                 let filePath = '../../images/post';
                 var imagename = Date.now()+'.png';
                 const imagepath = filePath+'/'+Date.now()+'.png';
                 let buffer = Buffer.from(body.image[i].split(',')[1], 'base64');
                 fs.writeFileSync(path.join(__dirname, imagepath), buffer);               
-                newimage[i] = 'images/post/'+imagename;
+                imageArray.push('images/post/'+imagename);
             }
-
-            body.image = newimage;
-        }else{
-            let filePath = '../../images/post';
-            var imagename = Date.now()+'.png';
-            const imagepath = filePath+'/'+Date.now()+'.png';      
-            let buffer = Buffer.from(body.image[0].split(',')[1], 'base64');
-            fs.writeFileSync(path.join(__dirname, imagepath), buffer);
-            body.image = 'images/post/'+imagename; 
-        }
 
         const post = new postModel({        
             userCode: body.userCode,
             title: body.title,
             isAlbum: body.isAlbum,
             details: body.details,
-            image: body.image,
+            image: imageArray,
             postCode: Math.random().toString().substr(2, 6),
             likeCount: 0,
             commentCount: 0,
