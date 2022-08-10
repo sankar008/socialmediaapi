@@ -15,6 +15,7 @@ const createPost = async (req, res) => {
                 let buffer = Buffer.from(body.image[i].split(',')[1], 'base64');
                 fs.writeFileSync(path.join(__dirname, imagepath), buffer);               
                 imageArray.push('images/post/'+imagename);
+		//imageArray.push({"source": 'images/post/'+imagename});
             }
 
         const post = new postModel({        
@@ -96,13 +97,20 @@ const removeImage = async (req, res) => {
 const addImage = async (req, res) => {
     const body = req.body
     try{
-        let filePath = '../../images/post';
-        var imagename = Date.now()+'.png';
-        const imagepath = filePath+'/'+Date.now()+'.png';      
-        let buffer = Buffer.from(body.image.split(',')[1], 'base64');
-        fs.writeFileSync(path.join(__dirname, imagepath), buffer);
-        body.image = 'images/post/'+imagename; 
-        const addimage = await postModel.findOneAndUpdate({postCode: body.postCode}, {$push: {image: body.image}})
+
+	 const imageArray = [];
+         for(var i = 0; i <body.image.length; i++){
+                let filePath = '../../images/post';
+                var imagename = Date.now()+'.png';
+                const imagepath = filePath+'/'+Date.now()+'.png';
+                let buffer = Buffer.from(body.image[i].split(',')[1], 'base64');
+                fs.writeFileSync(path.join(__dirname, imagepath), buffer);
+                imageArray.push('images/post/'+imagename);
+         }
+	
+
+        
+        const addimage = await postModel.findOneAndUpdate({postCode: body.postCode}, {$push: {image: imageArray}})
         return res.status(200).json({
             success: 1,
             msg: "Image added successfully"
