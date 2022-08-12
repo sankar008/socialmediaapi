@@ -95,7 +95,7 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {    
     try{
-        const data = await userModel.find({}, {_id: 0, email: 1, firstName: 1, lastName: 1, userCode: 1, gender: 1, company_name: 1, website: 1, establishment_year: 1, head_office_location: 1, branches: 1, country: 1, state: 1, city: 1, address: 1, });        
+        const data = await userModel.find({}, {_id: 0, email: 1, firstName: 1, lastName: 1, userCode: 1, gender: 1, company_name: 1, website: 1, establishment_year: 1, head_office_location: 1, branches: 1, country: 1, state: 1, city: 1, address: 1, isAlbum: 1,  });        
         return res.status(200).json({
             success: 1,
             data: data

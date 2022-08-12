@@ -48,7 +48,6 @@ const getFriend =  async (req, res) => {
 
 const getRequest = async (req, res) => {
     try{
-
         const friendRequest = await FriendModule.aggregate([{
             $lookup:{
                 from:"users", 
