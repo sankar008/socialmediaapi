@@ -60,11 +60,13 @@ const createUser = async (req, res) => {
             address: body.address,
             business_area: body.business_area,
             mobileno: body.mobileno,
-	    gender: body.gender,	
+	        gender: body.gender,	
             role: body.role,
             image: body.image,
             password: body.password,
             verified: body.verified,
+            likeCount: 0,
+            postCount: 0,
             username: body.role == 'company'?body.company_name:body.firstName+' '+body.lastName,
             otp: body.otp
           });
@@ -95,7 +97,7 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {    
     try{
-        const data = await userModel.find({}, {_id: 0, email: 1, firstName: 1, lastName: 1, userCode: 1, gender: 1, company_name: 1, website: 1, establishment_year: 1, head_office_location: 1, branches: 1, country: 1, state: 1, city: 1, address: 1, isAlbum: 1,  });        
+        const data = await userModel.find({}, {_id: 0, email: 1, firstName: 1, lastName: 1, userCode: 1, gender: 1, company_name: 1, website: 1, establishment_year: 1, head_office_location: 1, branches: 1, country: 1, state: 1, city: 1, address: 1, isAlbum: 1});        
         return res.status(200).json({
             success: 1,
             data: data
@@ -133,6 +135,7 @@ const updateUser = async(req, res) => {
             head_office_location: body.head_office_location,
             branches: body.branches,
             country: body.country,
+            headline: body.headline,
             state: body.state,
             city: body.city,
 	        gender: body.gender,	
@@ -143,7 +146,7 @@ const updateUser = async(req, res) => {
             image: body.image,
             password: body.password,
             verified: body.verified,
-            skills: body.skills,
+            educations: body.educations,
             experiences: body.experiences,
             username: body.role == 'company'?body.company_name:body.firstName+' '+body.lastName,
             otp: body.otp

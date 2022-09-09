@@ -22,8 +22,7 @@ const createChatroom = async (req, res) => {
 }
 
 const getChatroom = async (req, res) => {
-    try{
-               
+    try{               
         const chatroom = await chatroomModel.aggregate([{
             $lookup : {
                 from: "users",
@@ -42,7 +41,7 @@ const getChatroom = async (req, res) => {
            docs.map((frds, index) => {
                 frds.frinds.map((user, iuser) => {
                     if(user.userCode != req.params.userCode){
-                        userData.push({chatroomCode: frds.chatroomCode, name: user.firstName+' '+user.lastName})
+                        userData.push({chatroomCode: frds.chatroomCode, name: user.firstName+' '+user.lastName, image: user.image, userCode: user.userCode})
                     }
                 })
            })

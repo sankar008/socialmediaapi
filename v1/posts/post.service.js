@@ -10,7 +10,10 @@ var PostSchema = new mongoose.Schema({
 	like: { type: Array },
 	likeCount: { type: Number },
 	commentCount: { type: Number },
-	groupCode: { type: Array }
+	groupCode: { type: Array },
+	location: {type: String},
+	date: {type: Date, required: function() { return this.isAlbum == 1?true: ''}},
+	onlyMe: {type: String, enum: ["0", "1"], default: "0"},   // 0 -> public , 1 -> only me 
 }, {timestamps: true});
 
 module.exports = mongoose.model("Post", PostSchema);

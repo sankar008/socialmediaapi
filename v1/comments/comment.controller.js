@@ -61,7 +61,29 @@ const getComment = async (req, res) => {
 
 
 
-const updateComment = (req, res) => {
+const updateComment = async (req, res) => {
+    const body = req.body
+    try{
+        const comment = await commentModel.findOneAndUpdate({commentCode: body.commentCode, userCode: body.userCode}, {comment: body.comment}) 
+      
+        if(comment != null){
+        return res.status(200).json({
+            success: 1,
+            msg: "Update successfull"
+        })
+      }else{
+        return res.status(400).json({
+            success: 0,
+            msg: "Data not found"
+        })
+      }
+
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
         
 }
 

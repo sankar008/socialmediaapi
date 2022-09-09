@@ -14,6 +14,9 @@ const commentRouter = require('./v1/comments/comment.router');
 const skillRouter = require("./v1/skill/skill.router");
 const chatroomRouter = require("./v1/chatroom/chatroom.router");
 const chatRouter = require("./v1/chat/chat.router");
+const degreeRouter = require("./v1/degree/degree.router");
+const empTypeRouter = require("./v1/emptype/emptype.router");
+const industryRouter = require("./v1/industrytype/industrytype.router");
 
 const upload = multer({
 	limits: { fieldSize: 25 * 1024 * 1024 }
@@ -27,7 +30,7 @@ const fs = require('fs');
  	cert: fs.readFileSync('/etc/letsencrypt/live/api.webdevelopments.in/fullchain.pem'),
   }, app):require('http').createServer(app);
 
-
+  const io = require("socket.io")(httpsServer, {cors: {origin: "*"}})
 
 app.use(cors());
 app.use(upload.none());
@@ -44,7 +47,24 @@ app.use('/v1/group', groupRouter);
 app.use('/v1/skill', skillRouter);
 app.use('/v1/chatroom', chatroomRouter);
 app.use('/v1/chat', chatRouter);
+app.use('/v1/degree', degreeRouter);
+app.use("/v1/emp-type", empTypeRouter);
+app.use("/v1/industry-type", industryRouter);
+
+const chatModel = require("./v1/chat/chat.service");
 
 httpsServer.listen(process.env.PORT, () => {
 console.log("Server is running:", process.env.PORT);
 })
+
+io.on("connection", (socket) => {
+
+	socket.on('sendMessageByUser', function(msg){
+        socket.broadcast.emit('receiveMessage', msg);
+    });
+  
+	socket.on("disconnect", () => {
+	  console.log("Someone has left");
+	})
+  });
+  

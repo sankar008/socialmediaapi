@@ -1,6 +1,6 @@
 const FriendModule = require('./friend.service');
 const UserModule = require('./../users/user.service');
-
+const chatroomModel = require("./../chatroom/chatroom.service");
 
 const requestSend = async (req, res) => {
     const body = req.body;
@@ -80,6 +80,17 @@ const acceptedRequest = async (req, res) => {
         const frdRequest = await FriendModule.findOneAndUpdate({friendCode: body.friendCode }, {status: 1});
         const addList1 = await UserModule.findOneAndUpdate({userCode: frdRequest.recipient}, {$push: {friends: frdRequest.requester}});
         const addList2 = await UserModule.findOneAndUpdate({userCode: frdRequest.requester}, {$push: {friends: frdRequest.recipient}});
+
+        
+        
+        const chat = new chatroomModel({
+            chatroomCode: Math.random().toString().substr(2, 6),
+            userCode: [frdRequest.recipient, frdRequest.requester],
+        })  
+
+        chat.save()
+
+
         return res.status(200).json({
             success: 1,
             msg: "Request accepted"
@@ -94,12 +105,29 @@ const acceptedRequest = async (req, res) => {
 }
 
 const deleteFriend = async (req, res) => {
+    try{
+       
+        const frdRequest = await FriendModule.findOne({$or:[{recipient: req.params.recipient,  requester: req.params.requester}, {recipient: req.params.requester,  requester: req.params.recipient}]});
+        const deleteChatroom = await chatroomModel.findOneAndDelete({userCode:[frdRequest.recipient, frdRequest.requester]});       
+        const addList1 = await UserModule.findOneAndUpdate({userCode: frdRequest.recipient}, {$pull: {friends: frdRequest.requester}});
+        const addList2 = await UserModule.findOneAndUpdate({userCode: frdRequest.requester}, {$pull: {friends: frdRequest.recipient}});        
+        const frdData = await FriendModule.findOneAndDelete({friendCode: req.params.friendCode});
 
+        return res.status(200).json({
+            success: 1,
+            msg: "Request deleted successfully"
+        })
+
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
 }
 
 const suggestFriend = async (req, res) => {
     try{
-
 
         const recipientId =  await FriendModule.find({recipient: req.params.userCode}, {requester: 1, recipient:1, _id: 0})
         const requestedId =  await FriendModule.find({requester: req.params.userCode}, {requester: 1, recipient:1, _id: 0})

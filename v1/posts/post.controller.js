@@ -1,5 +1,5 @@
 const postModel = require("./post.service");
-// const userModel = require("../users/user.service");
+const userModel = require("../users/user.service");
 const fs = require("fs");
 const path = require("path");
 const createPost = async (req, res) => {
@@ -8,6 +8,7 @@ const createPost = async (req, res) => {
     try{  
         
          const imageArray = [];
+        
             for(var i = 0; i <body.image.length; i++){
                 let filePath = '../../images/post';
                 var imagename = Date.now()+'.png';
@@ -28,15 +29,23 @@ const createPost = async (req, res) => {
             likeCount: 0,
             commentCount: 0,
             status: 1,
+            onlyMe:body.onlyMe,
+            date: body.date,
+            location: body.location,
             groupCode: body.groupCode
         })
-        const user = await post .save();
+        const postData = await post .save();
+
+            const updateData = await userModel.findOneAndUpdate({userCode:body.userCode}, { $inc: { "postCount": 1 } })
+        
         return res.status(200).json({
             success: 1,
-            data: user
+            data: postData
         }) 
     }
-    catch (error) {        
+    catch (error) {   
+        console.log(error);
+        return false;     
         let errors = {};
         Object.keys(error.errors).forEach((key) => {
             errors[key] = error.errors[key].message;
@@ -47,8 +56,24 @@ const createPost = async (req, res) => {
 
 }
 
+const getAlbum = async (req, res) => {
+    try{
+        const album = await postModel.find({isAlbum: "1", userCode: req.params.userCode})
+        return res.status(200).json({
+            success: 1,
+            data: album
+        })
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
 const getPosts = async (req, res) => {
     try{
+        var result = [];
         const data = await postModel.aggregate([{ $sort : { createdAt : -1 } },{
             $lookup: {
                 from: "users",
@@ -60,15 +85,62 @@ const getPosts = async (req, res) => {
                 $unwind: "$postBy"
             },
             {
-                $project: {"postBy.firstName": 1, "postBy.lastName": 1, "postBy.image": 1, userCode: 1, _id: 0, details: 1, image: 1, likeCount:1, commentCount: 1, postCode: 1, isAlbum: 1, title: 1}
-            }])
+                $project: {"postBy.firstName": 1, "postBy.lastName": 1, "postBy.image": 1, userCode: 1, _id: 0, details: 1, image: 1, likeCount:1, commentCount: 1, postCode: 1, isAlbum: 1, onlyMe:1, title: 1, createdAt:1}
+            }],function(errs, postData){
+
+                postData.map((post, index) => {
+                    if(post.onlyMe === "1"){
+                        post.userCode == req.params.userCode?result.push(post):""
+                    }else{
+                        result.push(post)
+                    }
+                })
+
+                return res.status(200).json({
+                                success: 1,
+                                data: result
+                            })
+
+            })
+        
+    }
+    catch(e){
+        return res.status(400).send(e);
+    }
+}
+
+const getLike = async (req, res) => {
+    try{
+
+        const data = await postModel.aggregate([
+            {
+                $lookup : {
+                    from: "users",
+                    localField: "like",
+                    foreignField: "userCode",
+                    as: "likes"
+                }
+            },
+            {
+                $match: {"postCode": req.params.postCode}
+            },
+            {
+                $project: {
+                    "likes.firstName": 1, _id: 0, "likes.lastName": 1, "likes.image": 1, "likeCount": 1
+                }
+            }
+        ])
+
         return res.status(200).json({
             success: 1,
             data: data
         })
-    }
-    catch(e){
-        return res.status(400).send(e);
+
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
     }
 }
 
@@ -128,7 +200,7 @@ const addImage = async (req, res) => {
 const updatePost = async (req, res) => {
     const body = req.body;
         try{
-            const post = await postModel.findOneAndUpdate({postCode: body.postCode}, {details: body.details, isAlbum: body.isAlbum, title: body.title});
+            const post = await postModel.findOneAndUpdate({postCode: body.postCode}, {details: body.details, isAlbum: body.isAlbum, onlyMe: body.onlyMe, title: body.title,  date: body.date, location: body.location});
 	    return res.status(200).json({
 		success: 1,
 		msg: "updated successfull"
@@ -158,7 +230,12 @@ const getPostBypostCode = async (req, res) => {
 
 const deletePost = async (req, res) => {    
     try{
+        const postDetails = await postModel.findOne({postCode: req.params.postCode})
+
         const post = await postModel.findOneAndDelete({postCode: req.params.postCode});
+
+        const updateData = await userModel.findOneAndUpdate({userCode:postDetails.userCode}, { $inc: { "postCount": -1 } })
+        
         
         if(post){
             return res.status(200).json({
@@ -185,6 +262,10 @@ const likePost = async (req, res) => {
     try{
         const like = await postModel.findOneAndUpdate({postCode: req.params.postCode}, {$push:{like:req.params.userCode}})
         const post = await postModel.findOneAndUpdate({'postCode': req.params.postCode},{ $inc: { "likeCount": 1 } })
+
+        const updateData = await userModel.findOneAndUpdate({userCode:req.params.userCode}, { $inc: { "likeCount": 1 } })
+
+
         return res.status(200).json({
             success: 1,
             msg: "Success"
@@ -201,6 +282,8 @@ const dislikePost = async (req, res) => {
     try{
         const like = await postModel.findOneAndUpdate({postCode: req.params.postCode}, {$pull:{like:req.params.userCode}})  
         const post = await postModel.findOneAndUpdate({'postCode': req.params.postCode},{ $inc: { "likeCount": -1 } })
+        const updateData = await userModel.findOneAndUpdate({userCode:req.params.userCode}, { $inc: { "likeCount": -1 } })
+
         return res.status(200).json({
             success: 1,
             msg: "Success"
@@ -225,5 +308,7 @@ module.exports = {
     likePost: likePost,
     dislikePost: dislikePost,
     removeImage: removeImage,
-    addImage: addImage
+    addImage: addImage,
+    getLike: getLike,
+    getAlbum: getAlbum
 }

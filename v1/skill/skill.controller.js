@@ -3,9 +3,11 @@ const skillModule = require("./skill.service");
 const createSkill = async (req, res) => {
     const body = req.body; 
     try{      
-       if(await skillModule.find({skill: body.skill}).count() == 0){
+        
+       if(await skillModule.find({value: body.skill}).count() == 0){
             const skillObj = new skillModule({
-                skill: body.skill,
+                value: body.skill,
+                label: body.skill,
                 skillCode: Math.random().toString().substr(2, 6),
         })
         const data = await skillObj.save();

@@ -1,7 +1,8 @@
 var mongoose = require("mongoose");
 
 const SkillSchema = new mongoose.Schema({
-    skill: {type: String, required: [true, "Skill is a require field"]},
+    value: {type: String, required: [true, "Skill value is a require field"]},
+    label: {type: String, required: [true, "Skill lavel is a require field"]},
     skillCode: {type: String}
 }, {timestamps: true})
 

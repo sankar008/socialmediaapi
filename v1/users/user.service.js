@@ -10,6 +10,7 @@ var UserSchema = new mongoose.Schema({
 	website: { type: String },
 	establishment_year: { type: Number },
 	head_office_location: { type: String },
+	headline: {type: String},
 	branches: { type: String },
 	country: { type: String },
 	state: { type: String },
@@ -24,11 +25,12 @@ var UserSchema = new mongoose.Schema({
 	verified: { type: String, enum : ['1','0'], default: '0' },
 	username: { type: String },
 	groups: {type: Array},
-	skills: { type: Array},
+	educations: { type: Array},
 	experiences: { type: Array},
 	friends: {type: Array},
-	otp: { type: String }
-
+	otp: { type: String },
+	postCount: {type: Number},	
+	likeCount: {type: Number}
 }, {timestamps: true});
 
 UserSchema
