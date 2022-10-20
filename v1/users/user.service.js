@@ -30,7 +30,9 @@ var UserSchema = new mongoose.Schema({
 	friends: {type: Array},
 	otp: { type: String },
 	postCount: {type: Number},	
-	likeCount: {type: Number}
+	likeCount: {type: Number},
+	socketId: {type: String},
+	isOnline: { type: String, enum : ['1','0'], default: '0' }
 }, {timestamps: true});
 
 UserSchema

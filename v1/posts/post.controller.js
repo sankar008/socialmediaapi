@@ -74,7 +74,7 @@ const getAlbum = async (req, res) => {
 const getPosts = async (req, res) => {
     try{
         var result = [];
-        const data = await postModel.aggregate([{ $sort : { createdAt : -1 } },{
+        const data = await postModel.aggregate([{ $sort : { updatedAt : -1 } },{
             $lookup: {
                 from: "users",
                 localField: "userCode", 
@@ -85,7 +85,7 @@ const getPosts = async (req, res) => {
                 $unwind: "$postBy"
             },
             {
-                $project: {"postBy.firstName": 1, "postBy.lastName": 1, "postBy.image": 1, userCode: 1, _id: 0, details: 1, image: 1, likeCount:1, commentCount: 1, postCode: 1, isAlbum: 1, onlyMe:1, title: 1, createdAt:1}
+                $project: {"postBy.firstName": 1, "isEdited": 1,  "postBy.lastName": 1, "postBy.image": 1, userCode: 1, _id: 0, details: 1, image: 1, likeCount:1, commentCount: 1, postCode: 1, isAlbum: 1, onlyMe:1, title: 1, updatedAt:1}
             }],function(errs, postData){
 
                 postData.map((post, index) => {
@@ -200,7 +200,7 @@ const addImage = async (req, res) => {
 const updatePost = async (req, res) => {
     const body = req.body;
         try{
-            const post = await postModel.findOneAndUpdate({postCode: body.postCode}, {details: body.details, isAlbum: body.isAlbum, onlyMe: body.onlyMe, title: body.title,  date: body.date, location: body.location});
+            const post = await postModel.findOneAndUpdate({postCode: body.postCode}, {details: body.details, isEdited: "1",  isAlbum: body.isAlbum, onlyMe: body.onlyMe, title: body.title,  date: body.date, location: body.location});
 	    return res.status(200).json({
 		success: 1,
 		msg: "updated successfull"

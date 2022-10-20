@@ -4,6 +4,7 @@ const chatSchema  = new mongoose.Schema({
     sendBy: { type: String, required: [true, "SendBy is a required field"]},
     chatroomCode: { type: String, required: [true, "chatroom code must be required"]},
     message: { type: String},
+    image: { type: Array},
     socketId: { type: String}
 }, {timestamps: true})
 

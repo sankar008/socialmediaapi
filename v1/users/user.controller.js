@@ -3,6 +3,7 @@ const { genSaltSync, hashSync, compareSync} = require('bcrypt');
 const { sign } = require("jsonwebtoken");
 var nodemailer = require('nodemailer');
 const Email = require("../../config/email.json");
+const groupModel = require("../groups/group.service");
 
 const fs = require("fs");
 const path = require("path");
@@ -358,7 +359,9 @@ const userLogin = async (req, res) => {
 const joinGroup = async (req, res) => {
         const body = req.body
         try{       
-            const addGroup = await userModel.findOneAndUpdate({userCode: body.userCode}, {$push: {groups: body.groupCode}}); 
+            const addGroup = await userModel.findOneAndUpdate({userCode: body.userCode}, {$push: {groups: body.groupCode}});
+            //const countGroup = await groupModel.findByIdAndUpdate({groupCode: body.groupCode}, {$inc: {"userCount": 1}})
+ 
             return res.status(200).json({
                 success: 1,
                 msg: "Group join successfull"
@@ -369,6 +372,23 @@ const joinGroup = async (req, res) => {
                 msg: e
             })
         }
+}
+
+const exitsGroup = async (req, res) => {
+    const body = req.body
+    try{       
+        const addGroup = await userModel.findOneAndUpdate({userCode: body.userCode}, {$pull: {groups: body.groupCode}}); 
+        //const countGroup = await groupModel.findByIdAndUpdate({groupCode: body.groupCode}, {$inc: {"userCount": -1}})
+        return res.status(200).json({
+            success: 1,
+            msg: "Group exists successfull"
+        })
+    }catch(e){
+        return res.status(200).json({
+            success: 0,
+            msg: e
+        })
+    }
 } 
 
 module.exports = {
@@ -381,5 +401,6 @@ module.exports = {
     otpVerification: otpVerification,
     sendOtp: sendOtp,
     joinGroup: joinGroup,
-    userLogin: userLogin
+    userLogin: userLogin,
+   exitsGroup: exitsGroup
 }

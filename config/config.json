@@ -1,0 +1,5 @@
+{
+    "MONGODB_URL": "mongodb://sankar008:ahpghjclqltxiryu@172.105.63.248:27017/agora?authSource=admin",
+    "PORT":3000,
+    "NODE_ENV":"Test"
+}

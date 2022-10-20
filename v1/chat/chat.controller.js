@@ -45,7 +45,7 @@ const getChat = async (req, res) => {
             }
         },
         {
-            $project: {"user.firstName": 1, "user.lastName": 1, "user.image": 1, sendBy: 1, chatroomCode: 1, message: 1, _id: 0}
+            $project: {"user.firstName": 1, "user.lastName": 1, "user.image": 1, image:1, sendBy: 1, chatroomCode: 1, message: 1, _id: 0}
         }
     ])
 

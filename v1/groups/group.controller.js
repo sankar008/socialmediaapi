@@ -171,11 +171,43 @@ const deleteGroup = async (req, res) => {
 }
 
 
+const getAllJoinGroup = async (req, res) => {
+    try{
+        const data = await userModel.aggregate([{
+            $lookup: {
+                from: 'groups',
+                localField: 'groups',
+                foreignField: 'groupCode',
+                as: 'group'
+            }
+        },
+        {
+            $match: {userCode: req.params.userCode}
+        },
+        {
+            $project: {"group.groupCode": 1, _id: 0, userCode: 1, "group.groupName": 1, "group.groupDetails": 1, "group.image": 1}
+        }
+        ])
+
+        return res.status(200).json({
+            success: 200,
+            data: data[0]
+        })
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
+
 module.exports = {
     createGroup: createGroup,
     updateGroup: updateGroup,
     getGroup: getGroup,
     getGroupByCode:getGroupByCode,
     deleteGroup: deleteGroup,
-    getGroupByuserCode: getGroupByuserCode
+    getGroupByuserCode: getGroupByuserCode, 
+    getAllJoinGroup:getAllJoinGroup 
 }

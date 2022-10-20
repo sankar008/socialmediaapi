@@ -1,5 +1,6 @@
 var mongoose = require("mongoose");
-var MONGODB_URL = "mongodb://sankar008:ahpghjclqltxiryu@172.105.63.248:27017/agora?authSource=admin"
+const config = require("./config/config.json");
+var MONGODB_URL = config.MONGODB_URL;
 mongoose.connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
 	if(process.env.NODE_ENV !== "test") {
 		console.log("Database connected");

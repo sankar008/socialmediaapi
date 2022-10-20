@@ -46,6 +46,37 @@ const getFriend =  async (req, res) => {
     }
 }
 
+const getSendRequest = async (req, res) => {
+
+    try{
+        const friendRequest = await FriendModule.aggregate([{
+            $lookup:{
+                from:"users", 
+                localField: "recipient", 
+                foreignField: "userCode", 
+                as: "recipient"
+            }},
+            {
+                $unwind: "$recipient"
+            },
+            {
+                $match: {requester: req.params.userCode, status: 0}
+            }          
+        ]);        
+
+
+        return res.status(200).json({
+            success: 1,
+            data: friendRequest
+        })
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
 const getRequest = async (req, res) => {
     try{
         const friendRequest = await FriendModule.aggregate([{
@@ -111,7 +142,7 @@ const deleteFriend = async (req, res) => {
         const deleteChatroom = await chatroomModel.findOneAndDelete({userCode:[frdRequest.recipient, frdRequest.requester]});       
         const addList1 = await UserModule.findOneAndUpdate({userCode: frdRequest.recipient}, {$pull: {friends: frdRequest.requester}});
         const addList2 = await UserModule.findOneAndUpdate({userCode: frdRequest.requester}, {$pull: {friends: frdRequest.recipient}});        
-        const frdData = await FriendModule.findOneAndDelete({friendCode: req.params.friendCode});
+        const frdData = await FriendModule.findOneAndDelete({friendCode: frdRequest.friendCode});
 
         return res.status(200).json({
             success: 1,
@@ -165,7 +196,64 @@ const suggestFriend = async (req, res) => {
 }
 
 const searchFriend = async (req, res) => {
+    try{
+        // const friends = await UserModule.find({$and:[{friends:req.params.userCode}, {'firstName' : {'$regex': '^'+req.params.search, "$options": "i"}}, {userCode:{ $ne: req.params.userCode }}]})
+        
 
+        const chatroom = await chatroomModel.aggregate([{
+            $lookup : {
+                from: "users",
+                localField: "userCode", 
+                foreignField: "userCode", 
+                as: "frinds"
+            }}, 
+            {
+                $lookup : {
+                    from: "chats",
+                    localField: "chatroomCode", 
+                    foreignField: "chatroomCode", 
+                    as: "chat"
+                }},   
+            {
+                $match: {$and:[{"userCode":req.params.userCode}, {'frinds.firstName' : {'$regex': '^'+req.params.search, "$options": "i"}}]}
+            },                      
+            {
+                $project: {"frinds.userCode": 1, "frinds.firstName": 1, "frinds.lastName": 1, "frinds.isOnline": 1, "frinds.image": 1, _id: 0, chatroomCode: 1, isGroup: 1, groupName: 1, groupIcon: 1, createdBy: 1, "chat.createdAt": 1  }
+            },
+            {
+                $sort: {"chat.createdAt": -1}
+            }
+            ], function(err, data){
+                var dataArray = []
+                data.map((rec, index) => {
+                  
+                    if(rec.isGroup !== "1"){
+                    //     dataArray.push({name: rec.groupName, image: rec.groupIcon, isGroup: "1", chatroomCode: rec.chatroomCode})
+                    // }else{
+                        rec.frinds.map((frds, index) => {
+                            if(frds.userCode != req.params.userCode){
+                                dataArray.push({name: frds.firstName+' '+ frds.lastName, image: frds.image, userCode: frds.userCode, isGroup: "0", chatroomCode: rec.chatroomCode, isOnline: frds.isOnline})
+                            }
+                        })
+                    }
+                })
+
+               return res.status(200).json({
+                    success: 1,
+                    data: dataArray
+                })
+
+            }
+            ) 
+        
+        
+       
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
 }
 
 module.exports = {
@@ -175,5 +263,6 @@ module.exports = {
     acceptedRequest: acceptedRequest,
     deleteFriend: deleteFriend,
     suggestFriend: suggestFriend,
-    searchFriend: searchFriend
+    searchFriend: searchFriend, 
+    getSendRequest: getSendRequest
 }

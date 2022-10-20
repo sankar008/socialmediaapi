@@ -1,0 +1,145 @@
+const chatroomModel = require('./chatroom.service');
+const userMode = require('../users/user.service');
+
+const createChatroom = async (req, res) => {
+    const body = req.body;
+    try{
+        const chat = new chatroomModel({
+            chatroomCode: Math.random().toString().substr(2, 6),
+            groupName: body.groupName,
+            isGroup: body.isGroup,
+            groupIcon: body.groupIcon,
+            userCode: body.userCode,
+	   createdBy: body.createdBy
+        })        
+        const chatroom = await chat.save();
+        return res.status(200).json({
+            success: 1,
+            data: chatroom
+        })
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
+
+                       }
+                        })
+                    }
+                })
+
+               return res.status(200).json({
+                    success: 1,
+                    data: dataArray
+                })
+
+            }
+            )    
+            
+           
+        
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
+
+
+const updateChatroom = async (req, res) => {
+    const body = req.body;
+    try{
+        if(body.groupIcon){
+           const chatroom = await chatroomModel.findOneAndUpdate({chatroomCode: body.chatroomCode}, {groupName: body.groupName, groupIcon: body.groupIcon});
+        }else{
+            const chatroom = await chatroomModel.findOneAndUpdate({chatroomCode: body.chatroomCode}, {groupName: body.groupName});
+        }
+
+        return res.status(200).json({
+            success: 1,
+            msg: "Update successfully."
+        })
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
+
+const getParticipantsName = async (req, res) => {
+
+    try{
+        const participants = await chatroomModel.aggregate([{
+            $lookup : {
+                from: "users",
+                localField: "userCode", 
+                foreignField: "userCode", 
+                as: "frinds"
+            }},
+            {
+                $match: {chatroomCode: req.params.chatroomCode}
+            }
+        ], function(err, par){
+
+            var participantName = "";
+            par[0].frinds.map((frd, index) => {
+                if(frd.userCode !== req.params.userCode)
+                if(participantName !== ''){
+                    participantName = participantName + ', '+ frd.firstName+' '+frd.lastName;
+                }else{
+                    participantName = frd.firstName+' '+frd.lastName;
+                }
+                
+            })
+
+
+            return res.status(200).json({
+                success: 1,
+                data: participantName
+            })
+        })
+
+
+        
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
+
+const getChatroomByCode = async (req, res) =>{
+    try{
+
+        const chatroom = await chatroomModel.findOne({chatroomCode: req.params.chatroomCode})
+
+        return res.status(200).json({
+            success: 1,
+            data: chatroom
+        })
+    }catch(e){
+        return res.status(400).json({
+            success: 0,
+            msg: e
+        })
+    }
+}
+
+module.exports = {
+    createChatroom: createChatroom,
+    getChatroom: getChatroom,
+    updateChatroom: updateChatroom,
+    getParticipantsName: getParticipantsName,
+    getChatroomByCode:getChatroomByCode
+	
+	
+}
